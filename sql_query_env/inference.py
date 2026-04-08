@@ -2,14 +2,22 @@ import os
 import json
 from client import EnvClient
 
-from groq import Groq
+from openai import OpenAI
+
+import os
+
+os.environ["MODEL_NAME"] = "openai/gpt-oss-20b:free"
+os.environ["API_BASE_URL"] = "https://openrouter.ai/api/v1"
+os.environ["HF_TOKEN"] = "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"
 
 # Initialize Groq client
-groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+openai_client = OpenAI(
+    base_url=os.getenv("API_BASE_URL"),
+    api_key=os.getenv("HF_TOKEN")
+)
 
 def log_start(task: str, env: str, model: str):
-    print(json.dumps({
-        "event": "start",
+    print("[START] " + json.dumps({
         "task": task,
         "env": env,
         "model": model
@@ -17,8 +25,7 @@ def log_start(task: str, env: str, model: str):
 
 
 def log_step(step: int, action: str, reward: float, done: bool, error: str):
-    print(json.dumps({
-        "event": "step",
+    print("[STEP] " + json.dumps({
         "step": step,
         "action": action,
         "reward": reward,
@@ -26,10 +33,8 @@ def log_step(step: int, action: str, reward: float, done: bool, error: str):
         "error": error
     }))
 
-
 def log_end(score: float, success: bool):
-    print(json.dumps({
-        "event": "end",
+    print("[END] " + json.dumps({
         "score": score,
         "success": success
     }))
@@ -53,8 +58,8 @@ Broken Query:
 {broken_query}
 """
 
-    response = groq_client.chat.completions.create(
-        model="llama-3.1-8b-instant",
+    response = openai_client.chat.completions.create(
+        model=os.getenv("MODEL_NAME"),
         messages=[
             {"role": "user", "content": prompt}
         ],
@@ -77,7 +82,7 @@ def run_task(task_id: str):
     result = client.reset(task_id)
     obs = result["observation"]
 
-    log_start(task=task_id, env="sql_query_env", model="llama-3.1-8b-instant")
+    log_start(task=task_id, env="sql_query_env", model=os.getenv("MODEL_NAME"))
 
     max_steps = 4  # IMPORTANT (keeps API usage low)
 
@@ -117,4 +122,4 @@ def run_task(task_id: str):
     final_score = obs["best_score_so_far"]
     success = final_score == 1.0
 
-    log_end(score=final_score, success=success)
+    log_end(score=final_score, success=success)   

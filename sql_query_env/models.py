@@ -1,5 +1,20 @@
-from openenv.core.env_server import Action, Observation, State
-from typing import Optional
+from pydantic import BaseModel
+from typing import Dict, Any
+
+
+# Base classes (replacement for openenv.core)
+class Action(BaseModel):
+    pass
+
+
+class Observation(BaseModel):
+    done: bool
+    reward: float
+    metadata: Dict[str, Any] = {}
+
+
+class State(BaseModel):
+    pass
 
 # =========================
 # ACTION (Agent → Env)
@@ -29,7 +44,8 @@ class SQLObservation(Observation):
 # =========================
 class SQLState(State):
     # Inherited: episode_id, step_count
-
+    episode_id: str
+    step_count: int
     task_id: str
     max_steps: int
     current_score: float
