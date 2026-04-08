@@ -1,0 +1,2 @@
+# SQL_QUERY_CORRECTION_TOOL
+A SQL query debugger
