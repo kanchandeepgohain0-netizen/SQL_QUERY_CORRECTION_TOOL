@@ -1,0 +1,21 @@
+name: sql_query_env
+version: "1.0.0"
+description: >
+  SQL Query Correction and Optimization Environment.
+  Agent fixes broken SQL queries across three difficulty levels.
+
+tasks:
+  - id: task_1_syntax
+    difficulty: easy
+
+  - id: task_2_logic
+    difficulty: medium
+
+  - id: task_3_optimization
+    difficulty: hard
+
+hardware:
+  cpu: 2
+  memory_gb: 8
+
+entrypoint: inference.py
