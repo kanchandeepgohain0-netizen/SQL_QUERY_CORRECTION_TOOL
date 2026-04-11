@@ -6,11 +6,10 @@ from openai import OpenAI
 
 import os
 
-os.environ["MODEL_NAME"] = "openai/gpt-oss-20b:free"
-os.environ["API_BASE_URL"] = "https://openrouter.ai/api/v1"
-os.environ["HF_TOKEN"] = "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"
+os.environ["MODEL_NAME"] = "openai/gpt-5.2"
+os.environ["API_BASE_URL"] = "https://openrouter.ai/api/v1/chat/completions"
+os.environ["HF_TOKEN"] = "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"
 
-# Initialize Groq client
 openai_client = OpenAI(
     base_url=os.getenv("API_BASE_URL"),
     api_key=os.getenv("HF_TOKEN")
@@ -122,4 +121,8 @@ def run_task(task_id: str):
     final_score = obs["best_score_so_far"]
     success = final_score == 1.0
 
-    log_end(score=final_score, success=success)   
+    log_end(score=final_score, success=success)  
+
+print(os.getenv("MODEL_NAME"))
+print(os.getenv("API_BASE_URL"))
+print(os.getenv("HF_TOKEN"))

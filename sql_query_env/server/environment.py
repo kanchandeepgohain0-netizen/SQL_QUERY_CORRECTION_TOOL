@@ -17,8 +17,7 @@ class StepResult(BaseModel):
 
 class SQLQueryEnvironment:
     def __init__(self):
-        self.conn = None
-        self.cursor = None
+        self.db_path = None
         self.current_task = None
         self.task_id = None
         self.step_count = 0
@@ -27,6 +26,10 @@ class SQLQueryEnvironment:
         self.episode_id = None
 
     def reset(self, task_id: str) -> StepResult:
+        # Thread-safe: create fresh connection for this operation
+        conn, cursor = create_database(task_id)
+        self.db_path = task_id + ".db"
+        
         # Set task
         self.task_id = task_id
         self.current_task = TASKS[task_id]
@@ -36,16 +39,16 @@ class SQLQueryEnvironment:
         self.best_score = 0.0
         self.episode_id = str(uuid.uuid4())
 
-        # Create fresh database
-        self.conn, self.cursor = create_database(task_id)
-
         # Setup database based on task
         if task_id == "task_1_syntax":
-            setup_task_1(self.conn, self.cursor)
+            setup_task_1(conn, cursor)
         elif task_id == "task_2_logic":
-            setup_task_2(self.conn, self.cursor)
+            setup_task_2(conn, cursor)
         elif task_id == "task_3_optimization":
-            setup_task_3(self.conn, self.cursor)
+            setup_task_3(conn, cursor)
+        
+        # Close connection immediately (fresh connection per operation)
+        conn.close()
 
         # Build initial observation
         obs = SQLObservation(
@@ -69,22 +72,31 @@ class SQLQueryEnvironment:
             info={}
         )
     def _get_schema(self) -> str:
+        # Thread-safe: create fresh connection for this operation
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
         schema_info = []
 
-        self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-        tables = self.cursor.fetchall()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tables = cursor.fetchall()
 
         for table in tables:
             table_name = table[0]
-            self.cursor.execute(f"PRAGMA table_info({table_name});")
-            columns = self.cursor.fetchall()
+            cursor.execute(f"PRAGMA table_info({table_name});")
+            columns = cursor.fetchall()
 
             column_defs = [f"{col[1]} ({col[2]})" for col in columns]
             schema_info.append(f"{table_name}: " + ", ".join(column_defs))
 
+        conn.close()
         return "\n".join(schema_info)
     
     def step(self, action: SQLAction) -> StepResult:
+        # Thread-safe: create fresh connection for this operation
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
         self.step_count += 1
 
         query = action.query
@@ -95,9 +107,9 @@ class SQLQueryEnvironment:
 
         # Execute query
         try:
-            self.cursor.execute(query)
-            result_rows = self.cursor.fetchall()
-            result_columns = [desc[0] for desc in self.cursor.description] if self.cursor.description else []
+            cursor.execute(query)
+            result_rows = cursor.fetchall()
+            result_columns = [desc[0] for desc in cursor.description] if cursor.description else []
         except Exception as e:
             error_message = str(e)
             has_error = True
@@ -105,9 +117,9 @@ class SQLQueryEnvironment:
         # Get expected result
         expected_query = self.current_task["expected_query"]
 
-        self.cursor.execute(expected_query)
-        expected_rows = self.cursor.fetchall()
-        expected_columns = [desc[0] for desc in self.cursor.description]
+        cursor.execute(expected_query)
+        expected_rows = cursor.fetchall()
+        expected_columns = [desc[0] for desc in cursor.description]
 
         # Compute reward
         reward = compute_reward(
@@ -139,6 +151,9 @@ class SQLQueryEnvironment:
             reward=reward,
             done=done
         )
+        
+        # Close connection immediately after operation (fresh connection per operation)
+        conn.close()
 
         return StepResult(
             observation=obs,
