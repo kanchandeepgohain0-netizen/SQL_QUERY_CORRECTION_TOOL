@@ -1,0 +1,88 @@
+# ========== PYTHON ==========
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ========== VIRTUAL ENVIRONMENT ==========
+venv/
+ENV/
+env/
+.venv
+.env/
+bin/
+include/
+lib/
+pyvenv.cfg
+
+# ========== TEST/RUNTIME DATABASES ==========
+*.db
+*.sqlite
+*.sqlite3
+task_1_syntax.db
+task_2_logic.db
+task_3_optimization.db
+test_task.db
+test_*.db
+
+# ========== ENVIRONMENT VARIABLES ==========
+.env
+.env.local
+.env.*.local
+.env.prod
+
+# ========== IDE / EDITOR ==========
+.vscode/
+.vs/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.AppleDouble
+.LSOverride
+*.sublime-workspace
+*.sublime-project
+
+# ========== BUILD / CACHE ==========
+build/
+dist/
+*.build
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# ========== OS SPECIFIC ==========
+Thumbs.db
+.DS_Store
+ehthumbs.db
+Desktop.ini
+
+# ========== PROJECT SPECIFIC ==========
+*.log
+.mypy_cache/
+.dmypy.json
+dmypy.json
+tempCodeRunnerFile.py
