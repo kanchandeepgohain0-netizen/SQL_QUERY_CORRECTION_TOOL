@@ -118,3 +118,6 @@ def run_task(task_id: str):
     success = final_score == 1.0
 
     log_end(score=final_score, success=success)  
+
+print(os.getenv("MODEL_NAME"))
+print(os.getenv("API_BASE_URL"))
